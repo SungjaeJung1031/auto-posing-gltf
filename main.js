@@ -4,6 +4,10 @@ let gGLTFLoader, gClock, gMixer, clip, gAction, gCharacter;
 let gGroup;
 let gDashboard;
 
+const gSphereGeometry = new THREE.SphereGeometry(0.05);
+const gSphereMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00, transparent: true });
+var gSpheres = [];
+
 function init(){
     gGUI                = new dat.GUI();
     gScene              = new THREE.Scene();
@@ -27,8 +31,30 @@ function init(){
     gScene.add(new THREE.AxesHelper(2));
     gScene.add(new THREE.GridHelper(10,10));   
     let controls =  new THREE.OrbitControls( gCamera, gRenderer.domElement );
-    gGLTFLoader.load( './data/running.glb', function ( glf ) {
+    gGLTFLoader.load( './100STYLE_GLB/Balance/Balance_FW.glb', function ( glf ) {
         gCharacter = glf.scene;
+        console.log(gCharacter)
+
+        let count = 0;
+        gCharacter.traverse(n => {
+            if (n.isBone) 
+            {
+                gSpheres.push(new THREE.Mesh(gSphereGeometry, gSphereMaterial));
+                n.getWorldPosition(gSpheres[count].position);
+                console.log(gSpheres[count].position);
+                // console.log('found bone: ', n.name)
+            }
+            else
+            {
+                gSpheres.push(new THREE.Mesh(gSphereGeometry, gSphereMaterial));
+                n.getWorldPosition(gSpheres[count].position);
+                gSpheres[count].position.x = gSpheres[count].position.x * 0.01;
+                gSpheres[count].position.y = gSpheres[count].position.y * 0.01;
+                gSpheres[count].position.z = gSpheres[count].position.z * 0.01;
+            };
+            count = count +1;
+          });
+        gSpheres.forEach((c) => gScene.add(c));
         gScene.add( gCharacter );
         gMixer          = new THREE.AnimationMixer(gCharacter);
         clip           = glf.animations[ 0 ]
@@ -47,6 +73,7 @@ function init(){
         positionFolder.open();
         positionFolder.add(gCharacter.position,'x',-10,10,0.1).listen();
         positionFolder.add(gCharacter.position,'z',-10,10,0.1).listen();
+
         const quaternionFolder = gGUI.addFolder("quaternion");
 
         quaternionFolder.open();
