@@ -3,6 +3,9 @@ let gRenderer, gScene, gCamera;
 let gGLTFLoader, gClock, gMixer, clip, gAction, gCharacter;
 let gGroup;
 let gDashboard;
+let gOrbitControl;
+let gDragControl;
+
 
 const gSphereGeometry = new THREE.SphereGeometry(0.05);
 const gSphereMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00, transparent: true });
@@ -28,9 +31,16 @@ function init(){
     gScene.add(gGroup);
     gScene.add(new THREE.HemisphereLight( 0xffffff, 0xffffff) );
     gScene.add(new THREE.DirectionalLight( 0xffffff ) );
-    gScene.add(new THREE.AxesHelper(2));
-    gScene.add(new THREE.GridHelper(10,10));   
-    let controls =  new THREE.OrbitControls( gCamera, gRenderer.domElement );
+    gScene.add(new THREE.AxesHelper(3));
+    gScene.add(new THREE.GridHelper(50,50));   
+    
+    gOrbitControl =  new THREE.OrbitControls( gCamera, gRenderer.domElement );
+    gDragControl = new THREE.DragControls(gSpheres, gCamera, gRenderer.domElement);
+
+    // https://discourse.threejs.org/t/cant-i-use-dragcontrol-and-orbitcontrol-at-the-same-time/4265
+    gDragControl.addEventListener( 'dragstart', function () { gOrbitControl.enabled = false; } );
+    gDragControl.addEventListener( 'dragend', function () { gOrbitControl.enabled = true; } );
+
     gGLTFLoader.load( './100STYLE_GLB/Balance/Balance_FW.glb', function ( glf ) {
         gCharacter = glf.scene;
         console.log(gCharacter)
